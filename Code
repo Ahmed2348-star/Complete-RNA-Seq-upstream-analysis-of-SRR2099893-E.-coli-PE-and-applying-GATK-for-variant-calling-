@@ -62,7 +62,7 @@ featureCounts -T 8 -p -t CDS -g Parent -o count_matrix.txt -a /E.coli/reference_
 
 # through this, you can check your count matrix 
 
-################################################### Variant calling step  ##########################################################
+################################################### Variant calling step with GATK  ##########################################################
 # through this we can made the read groups metadata 
 
 python3 gatk AddOrReplaceReadGroups \
