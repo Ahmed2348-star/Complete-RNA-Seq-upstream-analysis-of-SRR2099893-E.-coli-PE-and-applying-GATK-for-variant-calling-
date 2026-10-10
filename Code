@@ -55,15 +55,42 @@ samtools flagstat aligned.bam
 ################################################### Quabtification using featureCounts ##########################################################
 # first we need to convert the GFF3 to gtf file . for this we will use gffread 
 gffread /E.coli/reference_genome/GCF_000005845.2_ASM584v2_genomic.gff -T  -o /E.coli/reference_genome/annotation.gtf
-
-featureCounts -T 8 -p -t CDS -g Parent -o count_matrix.txt -a /E.coli/reference_genome/annotation.gtf  /E.coli/aligned.bam --countReadPairs
+# we need to convert our bam file to sorted bam 
+samtools sort aligned.bam > sorted.bam 
+# now we can proceed safely with featureCounts to count the read
+featureCounts -T 8 -p -t CDS -g Parent -o count_matrix.txt -a /E.coli/reference_genome/annotation.gtf  /E.coli/sorted.bam --countReadPairs
 
 # through this, you can check your count matrix 
 
 ################################################### Variant calling step  ##########################################################
+# through this we can made the read groups metadata 
+
+python3 gatk AddOrReplaceReadGroups \
+  -I sorted.bam \
+  -O sorted.withRG.bam \
+  --RGID SRR2099893 \
+  --RGLB library1 \
+  --RGPL ILLUMINA \
+  --RGPU unit1 \
+  --RGSM sample1 \
+  --CREATE_INDEX true
+
+# through MarkDuplicates we can identify the PCR or oprical identical reads to be handled 
+
+python3 /mnt/e/GTAK/gatk-4.7.0.0/gatk-4.7.0.0/gatk MarkDuplicates  -I sorted.withRG.bam -O Cleaned.bam -M dup_metrics.txt  --CREATE_INDEX true
+
+#  create the .dict file for E. coli reference genome
+
+python3 gatk CreateSequenceDictionary -R /E.coli/reference_genome/GCF_000005845.2_ASM584v2_genomic.fna -O E.coli/reference_genome/GCF_000005845.2_ASM584v2_genomic.dict
+
+# we can create the fasta index to have here .fai file 
+samtools faidx /E.coli/reference_genome/GCF_000005845.2_ASM584v2_genomic.fna
+
+# to split , we can use SplitNCigarReads but here we have E.coli bacteria which contains no introns which in turn in the bam file if you tried to use (samtools view sorted.bam | head) you will not find the CIGAR has N in it. 
 
 
-
+# Here we will use HaplottypeCaller to make the .vcf file which contains the SNPs , Indels with their position , chromosome , REF , ALT and phred quality score for the variant calling 
+python3 /mnt/e/GTAK/gatk-4.7.0.0/gatk-4.7.0.0/gatk HaplotypeCaller -R /E.coli/reference_genome/GCF_000005845.2_ASM584v2_genomic.fna -I Cleaned.bam -O variants.vcf.gz   --sample-ploidy 1
 
 
 
