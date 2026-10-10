@@ -46,6 +46,23 @@ hisat2-build /E.coli/reference_genome/GCF_000005845.2_ASM584v2_genomic.fna.  /E.
 hisat2 -x E.coli/indexed_reference/(add the name of the index file till first dot) -1 SRR2099893_paired_1.fastq -2 SRR2099893_paired_2.fastq | samtools -b -o aligned.bam 
 
 
+# in our directory E.coli we will have aligned.bam file 
+
+# to check and know which is primary and secondary alignment we will use samtools flagstat 
+
+samtools flagstat aligned.bam 
+
+################################################### Quabtification using featureCounts ##########################################################
+# first we need to convert the GFF3 to gtf file . for this we will use gffread 
+gffread /E.coli/reference_genome/GCF_000005845.2_ASM584v2_genomic.gff -T  -o /E.coli/reference_genome/annotation.gtf
+
+featureCounts -T 8 -p -t CDS -g Parent -o count_matrix.txt -a /E.coli/reference_genome/annotation.gtf  /E.coli/aligned.bam --countReadPairs
+
+# through this, you can check your count matrix 
+
+################################################### Variant calling step  ##########################################################
+
+
 
 
 
