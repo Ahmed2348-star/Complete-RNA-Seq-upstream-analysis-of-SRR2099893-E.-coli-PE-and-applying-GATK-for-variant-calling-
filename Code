@@ -1,1 +1,12 @@
-prefetch 
+#bash 
+mkdir E.coli_work 
+cd E.coli work
+# here we download the fastq files with prefetch 
+prefetch SRR2099893
+fasterq-dump SRR2099893 --split-files 
+# after this process we will have R1 and R2 reads for the SRR2099893
+
+################################################### Prep files (TO BE GENERATED ONLY ONCE) ##########################################################
+
+fastqc *.fastq 
+# after this we will have 
