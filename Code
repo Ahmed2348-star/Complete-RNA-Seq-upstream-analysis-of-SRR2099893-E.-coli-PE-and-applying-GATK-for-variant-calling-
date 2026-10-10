@@ -6,7 +6,61 @@ prefetch SRR2099893
 fasterq-dump SRR2099893 --split-files 
 # after this process we will have R1 and R2 reads for the SRR2099893
 
+#following the previous steps we need then to download the reference genome and its appropriate annotation file 
+mkdir -p /mnt/e/E.coli/reference_genome
+
+cd /mnt/e/E.coli/reference_genome
+
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/005/845/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.fna.gz
+
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/005/845/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.gff.gz
+
+gunzip  GCF_000005845.2_ASM584v2_genomic.fna.gz
+gunzip  GCF_000005845.2_ASM584v2_genomic.gff.gz
 ################################################### Prep files (TO BE GENERATED ONLY ONCE) ##########################################################
+cd ../ 
+
+# Quality check 
+
 
 fastqc *.fastq 
-# after this we will have 
+# after this , Two fastqc html report will be generated ( one fastqc HTML report for R1 and R1) 
+
+#Trimming using Trimmomatic 
+
+Java -jar trimmomatic-0.41.jar PE -phred33 SRR2099893_1.fastq SRR2099893_2.fastq SRR2099893_paired_1.fastq SRR2099893_unpaired_1.fastq SRR2099893_paired_2.fastq SRR2099893_unpaired_2.fastq ILLUMINACLIP:TruSeq3-PE.fa LEADING:24 SLIDINGWINDOW:4:24 TRAILING:24 MINLEN:65 
+
+#following this step we have 4 files 2 paired and 2 unpaired 
+
+#post-quality check 
+
+fastqc SRR2099893_paired_1.fastq SRR2099893_paired_2.fastq
+
+# we will index the reference genome 
+
+mkdir indexed_reference 
+hisat2-build /E.coli/reference_genome/GCF_000005845.2_ASM584v2_genomic.fna.  /E.coli/indexed_reference 
+
+#after this if we go to the indexed_reference folder we will see about 8 files 
+
+hisat2 -x E.coli/indexed_reference/(add the name of the index file till first dot) -1 SRR2099893_paired_1.fastq -2 SRR2099893_paired_2.fastq | samtools -b -o aligned.bam 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
