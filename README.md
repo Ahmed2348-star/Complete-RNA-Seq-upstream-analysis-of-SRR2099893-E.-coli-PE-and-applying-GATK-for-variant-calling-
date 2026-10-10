@@ -5,6 +5,8 @@ A quality control check has been done using fastQC and trimming low quality read
 
 with hisat2-build we built the index of the reference genome (Escherichia coli K-12 MG1655.) and after building the index , the process of alignment is done and bam file generated.
 
+featureCounts is used here for the quantification process 
+
 it is important to note that we should download the GTF annotation file which should be compatible with the reference genome  
 
 Here comes the function of GTAK. Five GTAK functions used here: 
